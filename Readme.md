@@ -1,32 +1,3 @@
-```
-<#
-.SYNOPSIS
-Merge lrc files.
-.DESCRIPTION
-Merge lrc files.
-.PARAMETER Path
-Path to one or more locations. Wildcards are permitted.
-.PARAMETER MergeMethod
-Merge method. Default is 'Merge'. 'Merge' is to merge all lines with the same time. 'Intersect' is to merge all lines with the same time and split the lines with different time evenly. 'Union' is to merge all lines with the same time and split the lines with different time.
-.PARAMETER SplitChar
-Split character. Default is ' '.
-.PARAMETER MaxInterval
-Max interval for 'Intersect' method. Default is 10 (Second).
-.PARAMETER Offset
-Offset when meet max interval. Default is 1000 (Millisecond).
-.INPUTS
-System.String[]
-.OUTPUTS
-Lrc file.
-.EXAMPLE
-PS C:\> Merge-Lrc -Path "C:\Users\user\Music\*.lrc" -MergeMethod "Merge" -SplitChar " "
-This example merges all lrc files in the folder "C:\Users\user\Music\".
-.EXAMPLE
-PS C:\> Merge-Lrc -Path "C:\Users\user\Music\*.lrc" -MergeMethod "Intersect" -SplitChar " " | Out-File "C:\Users\user\Music\merged.lrc"
-This example merges all lrc files in the folder "C:\Users\user\Music\" and saves the result to "C:\Users\user\Music\merged.lrc".
-#>
-```
-
 # Merge-Lrc
 
 ## 介绍
