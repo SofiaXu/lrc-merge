@@ -1,37 +1,8 @@
-```
-<#
-.SYNOPSIS
-Merge lrc files.
-.DESCRIPTION
-Merge lrc files.
-.PARAMETER Path
-Path to one or more locations. Wildcards are permitted.
-.PARAMETER MergeMethod
-Merge method. Default is 'Merge'. 'Merge' is to merge all lines with the same time. 'Intersect' is to merge all lines with the same time and split the lines with different time evenly. 'Union' is to merge all lines with the same time and split the lines with different time.
-.PARAMETER SplitChar
-Split character. Default is ' '.
-.PARAMETER MaxInterval
-Max interval for 'Intersect' method. Default is 10 (Second).
-.PARAMETER Offset
-Offset when meet max interval. Default is 1000 (Millisecond).
-.INPUTS
-System.String[]
-.OUTPUTS
-Lrc file.
-.EXAMPLE
-PS C:\> Merge-Lrc -Path "C:\Users\user\Music\*.lrc" -MergeMethod "Merge" -SplitChar " "
-This example merges all lrc files in the folder "C:\Users\user\Music\".
-.EXAMPLE
-PS C:\> Merge-Lrc -Path "C:\Users\user\Music\*.lrc" -MergeMethod "Intersect" -SplitChar " " | Out-File "C:\Users\user\Music\merged.lrc"
-This example merges all lrc files in the folder "C:\Users\user\Music\" and saves the result to "C:\Users\user\Music\merged.lrc".
-#>
-```
-
 # Merge-Lrc
 
 ## 介绍
 
-这是一个用于合并歌词的小工具，可以将多个歌词文件合并成一个歌词文件。
+这是一个用于合并歌词的小工具，可以将多个歌词文件合并成一个歌词文件。注意，你首先需要安装 [PowerShell](https://learn.microsoft.com/zh-cn/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.3)，或者在 Windows 应用商店搜索安装。
 
 ## TL;DR
 
@@ -80,39 +51,43 @@ dir | % { .\Merge-Lrc.ps1 -Path $_.FullName -MergeMethod "Intersect" -SplitChar 
 - 输入文件
 
 ```lrc
-[00:00.00] test
-[00:00.00] test
-[00:00.00] test
-[00:01.00] test
-[00:01.00] test
-[00:01.00] test
+[00:10.00][00:00.00][00:01.00]This is the original text.
+[00:05.00]This is the next text.
+[00:05.00]这是第二句。
+[00:10.00][00:00.00][00:01.00]这是中文翻译。
 ```
 
 - Merge
 
 ```lrc
-[00:00.00] test test test
-[00:01.00] test test test
+[00:00.00]This is the original text. 这是中文翻译。
+[00:01.00]This is the original text. 这是中文翻译。
+[00:05.00]This is the next text. 这是第二句。
+[00:10.00]This is the original text. 这是中文翻译。
 ```
 
 - Intersect
 
 ```lrc
-[00:00.00] test
-[00:00.33] test
-[00:00.66] test
-[00:01.00] test
-[00:01.33] test
-[00:01.66] test
+[00:00.00]This is the original text.
+[00:00.50]这是中文翻译。
+[00:01.00]This is the original text.
+[00:03.00]这是中文翻译。
+[00:05.00]This is the next text.
+[00:07.50]这是第二句。
+[00:10.00]This is the original text.
+[00:11.00]这是中文翻译。
 ```
 
 - Union
 
 ```lrc
-[00:00.00] test
-[00:00.00] test
-[00:00.00] test
-[00:01.00] test
-[00:01.00] test
-[00:01.00] test
+[00:00.00]This is the original text.
+[00:00.00]这是中文翻译。
+[00:01.00]This is the original text.
+[00:01.00]这是中文翻译。
+[00:05.00]This is the next text.
+[00:05.00]这是第二句。
+[00:10.00]This is the original text.
+[00:10.00]这是中文翻译。
 ```
