@@ -43,7 +43,7 @@
 - 将一个文件夹下所有的混乱的歌词文件整理合并并保存
 
 ```powershell
-dir | % { .\Merge-Lrc.ps1 -Path $_.FullName -MergeMethod "Intersect" -SplitChar " " | Out-File $_.FullName }
+dir *.lrc | % { $file = $_; $out = .\Merge-Lrc.ps1 -Path $file.FullName -MergeMethod "Intersect";$out > $file.FullName }
 ```
 
 ## 合并方法结果
