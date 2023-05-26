@@ -2,7 +2,7 @@
 
 ## 介绍
 
-这是一个用于合并歌词的小工具，可以将多个歌词文件合并成一个歌词文件。
+这是一个用于合并歌词的小工具，可以将多个歌词文件合并成一个歌词文件。注意，你首先需要安装 [PowerShell](https://learn.microsoft.com/zh-cn/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.3)，或者在 Windows 应用商店搜索安装。
 
 ## TL;DR
 
