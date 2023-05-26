@@ -122,7 +122,7 @@ function Save-Lrc ($Lrc, $MergeMethod = "Merge", $SplitChar = " ", $MaxInterval 
             for ($i = 0; $i -lt $times.Count; $i++) {
                 $lines = $Lrc.Lines[$times[$i]] | Select-Object
                 if ($lines.Count -eq 1) {
-                    $out.Add("[$([timespan]::FromMilliseconds($times[$i]).ToString('mm\:ss\.ff'))]$($lines[0]))")
+                    $out.Add("[$([timespan]::FromMilliseconds($times[$i]).ToString('mm\:ss\.ff'))]$($lines)")
                 }
                 else {
                     if ($i -eq ($times.Count - 1)) {
