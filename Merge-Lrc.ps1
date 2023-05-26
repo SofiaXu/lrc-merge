@@ -75,6 +75,7 @@ class Lrc {
 }
 
 function Get-Lrc ($Path) {
+    [string[]]$timeFormatStrings = @('mm\:ss\.fff', 'mm\:ss\.ff', 'mm\:ss\.f', 'mm\:ss')
     return $Path | ForEach-Object {
         $lrc = [Lrc]::new()
         $lrc.Lines = [SortedDictionary[int, List[string]]]::new()
@@ -84,7 +85,7 @@ function Get-Lrc ($Path) {
             $lineContent = [regex]::Match($line, '(?:\[(\d+:\d+\.\d+)\])+(.*)')
             if ($lineContent.Success) {
                 $lineContent.Groups[1].Captures | ForEach-Object {
-                    $time = [timespan]::ParseExact($_.Value, 'mm\:ss\.ff', [cultureinfo]::GetCultureInfo('en-US')).TotalMilliseconds
+                    $time = [timespan]::ParseExact($_.Value, $timeFormatStrings, [cultureinfo]::GetCultureInfo('en-US')).TotalMilliseconds
                     if ($lrc.Lines.ContainsKey($time)) {
                         $lrc.Lines[$time].Add($lineContent.Groups[2].Value)
                     }
