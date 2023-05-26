@@ -51,39 +51,43 @@ dir | % { .\Merge-Lrc.ps1 -Path $_.FullName -MergeMethod "Intersect" -SplitChar 
 - 输入文件
 
 ```lrc
-[00:00.00] test
-[00:00.00] test
-[00:00.00] test
-[00:01.00] test
-[00:01.00] test
-[00:01.00] test
+[00:10.00][00:00.00][00:01.00]This is the original text.
+[00:05.00]This is the next text.
+[00:05.00]这是第二句。
+[00:10.00][00:00.00][00:01.00]这是中文翻译。
 ```
 
 - Merge
 
 ```lrc
-[00:00.00] test test test
-[00:01.00] test test test
+[00:00.00]This is the original text. 这是中文翻译。
+[00:01.00]This is the original text. 这是中文翻译。
+[00:05.00]This is the next text. 这是第二句。
+[00:10.00]This is the original text. 这是中文翻译。
 ```
 
 - Intersect
 
 ```lrc
-[00:00.00] test
-[00:00.33] test
-[00:00.66] test
-[00:01.00] test
-[00:01.33] test
-[00:01.66] test
+[00:00.00]This is the original text.
+[00:00.50]这是中文翻译。
+[00:01.00]This is the original text.
+[00:03.00]这是中文翻译。
+[00:05.00]This is the next text.
+[00:07.50]这是第二句。
+[00:10.00]This is the original text.
+[00:11.00]这是中文翻译。
 ```
 
 - Union
 
 ```lrc
-[00:00.00] test
-[00:00.00] test
-[00:00.00] test
-[00:01.00] test
-[00:01.00] test
-[00:01.00] test
+[00:00.00]This is the original text.
+[00:00.00]这是中文翻译。
+[00:01.00]This is the original text.
+[00:01.00]这是中文翻译。
+[00:05.00]This is the next text.
+[00:05.00]这是第二句。
+[00:10.00]This is the original text.
+[00:10.00]这是中文翻译。
 ```
