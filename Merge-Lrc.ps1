@@ -5,6 +5,8 @@ Merge lrc files.
 Merge lrc files.
 .PARAMETER Path
 Path to one or more locations. Wildcards are permitted.
+.PARAMETER LiteralPath
+Literal path to one or more locations.
 .PARAMETER MergeMethod
 Merge method. Default is 'Merge'. 'Merge' is to merge all lines with the same time. 'Intersect' is to merge all lines with the same time and split the lines with different time evenly. 'Union' is to merge all lines with the same time and split the lines with different time.
 .PARAMETER SplitChar
@@ -30,6 +32,8 @@ using namespace System.Collections.Generic
 [CmdletBinding()]
 param (
     [Parameter(Mandatory = $true,
+        Position = 0,
+        ParameterSetName = 'Path',
         ValueFromPipeline = $true,
         ValueFromPipelineByPropertyName = $true,
         HelpMessage = "Path to one or more locations. Wildcards are permitted.")]
@@ -38,17 +42,31 @@ param (
     [Alias("PSPath")]
     [string[]]
     $Path,
+    [Parameter(Mandatory = $true,
+        ParameterSetName = "LiteralPath",
+        ValueFromPipelineByPropertyName = $true,
+        HelpMessage = "Literal path to one or more locations.")]
+    [ValidateNotNullOrEmpty()]
+    [string[]]
+    $LiteralPath,
     [Parameter(
+        ParameterSetName = 'Path',
+        HelpMessage = "Merge method. Default is 'Merge'.")]
+    [Parameter(
+        ParameterSetName = 'LiteralPath',
         HelpMessage = "Merge method. Default is 'Merge'.")]
     [ValidateSet("Merge", "Intersect", "Union")]
     [string]
     $MergeMethod = "Merge",
-    [Parameter(HelpMessage = "Split character. Default is ' '.")]
+    [Parameter(ParameterSetName = 'Path', HelpMessage = "Split character. Default is ' '.")]
+    [Parameter(ParameterSetName = 'LiteralPath', HelpMessage = "Split character. Default is ' '.")]
     [string]
     $SplitChar = " ",
-    [Parameter(HelpMessage = "Max interval for 'Intersect' method. Default is 10 (Second).")]
+    [Parameter(ParameterSetName = 'Path', HelpMessage = "Max interval for 'Intersect' method. Default is 10 (Second).")]
+    [Parameter(ParameterSetName = 'LiteralPath', HelpMessage = "Max interval for 'Intersect' method. Default is 10 (Second).")]
     $MaxInterval = 10,
-    [Parameter(HelpMessage = "Offset when meet max interval. Default is 1000 (Millisecond).")]
+    [Parameter(ParameterSetName = 'Path', HelpMessage = "Offset when meet max interval. Default is 1000 (Millisecond).")]
+    [Parameter(ParameterSetName = 'LiteralPath', HelpMessage = "Offset when meet max interval. Default is 1000 (Millisecond).")]
     $Offset = 1000
 )
 
@@ -57,11 +75,10 @@ class Lrc {
 }
 
 function Get-Lrc ($Path) {
-    $files = Get-ChildItem -Path $Path
-    return $files | ForEach-Object {
+    return $Path | ForEach-Object {
         $lrc = [Lrc]::new()
         $lrc.Lines = [SortedDictionary[int, List[string]]]::new()
-        $lines = Get-Content -Path $_.FullName
+        $lines = Get-Content -LiteralPath $_
         $lines | ForEach-Object {
             $line = $_
             $lineContent = [regex]::Match($line, '(?:\[(\d+:\d+\.\d+)\])+(.*)')
@@ -157,7 +174,13 @@ function Save-Lrc ($Lrc, $MergeMethod = "Merge", $SplitChar = " ", $MaxInterval 
         }
     }
 }
-$lrcs = Get-Lrc -Path $Path
+if ($PSCmdlet.ParameterSetName -eq 'Path') {
+    $resolvedPaths = Resolve-Path -Path $Path | Select-Object -ExpandProperty Path
+}
+elseif ($PSCmdlet.ParameterSetName -eq 'LiteralPath') {
+    $resolvedPaths = Resolve-Path -LiteralPath $LiteralPath | Select-Object -ExpandProperty Path
+}
+$lrcs = Get-Lrc -Path $resolvedPaths
 if ($lrcs.Count -eq 0) {
     Write-Error "No lrc file found."
     return

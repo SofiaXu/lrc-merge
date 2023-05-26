@@ -10,11 +10,20 @@
 .\Merge-Lrc.ps1 -Path "C:\Users\user\Music\*.lrc" -MergeMethod "Merge" -SplitChar " " | Out-File "C:\Users\user\Music\merged.lrc"
 ```
 
+## 语法
+
+```powershell
+Merge-Lrc.ps1 [-Path] <String[]> [-MergeMethod <String>] [-SplitChar <String>] [-MaxInterval <Object>] [-Offset <Object>] [<CommonParameters>]
+
+Merge-Lrc.ps1 -LiteralPath <String[]> [-MergeMethod <String>] [-SplitChar <String>] [-MaxInterval <Object>] [-Offset <Object>] [<CommonParameters>]
+```
+
 ## 参数说明
 
 | 参数名      | 是否可选 | 默认值 | 说明                                                                                                                                             |
 | ----------- | -------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Path        | 否       | 无     | 歌词文件路径，支持通配符。                                                                                                                       |
+| Path        | 否       | 无     | 歌词文件路径，支持通配符。与 `LiteralPath` 选项互斥。                                                                                            |
+| LiteralPath | 否       | 无     | 歌词文件路径，不支持通配符。在文件名中含有特殊字符如 `[]` 等出错时使用。与 `Path` 选项互斥。                                                     |
 | MergeMethod | 是       | Merge  | 合并方法。Merge 为合并所有时间相同的行，Intersect 为合并所有时间相同的行并将时间不同的行均分，Union 为合并所有时间相同的行并将时间不同的行合并。 |
 | SplitChar   | 是       | 空格   | 分隔符。                                                                                                                                         |
 | MaxInterval | 是       | 10     | Intersect 方法的最大间隔。如果两句歌词超过这个间隔将使用 Offset 中定义的长度来确定下一句歌词的时间。                                             |
@@ -43,7 +52,7 @@
 - 将一个文件夹下所有的混乱的歌词文件整理合并并保存
 
 ```powershell
-dir *.lrc | % { $file = $_; $out = .\Merge-Lrc.ps1 -Path $file.FullName -MergeMethod "Intersect";$out > $file.FullName }
+dir *.lrc | % { $file = $_; $out = .\Merge-Lrc.ps1 -LiteralPath $file.FullName -MergeMethod "Intersect";$out > $file.FullName }
 ```
 
 ## 合并方法结果
