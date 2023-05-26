@@ -9,6 +9,10 @@ Path to one or more locations. Wildcards are permitted.
 Merge method. Default is 'Merge'. 'Merge' is to merge all lines with the same time. 'Intersect' is to merge all lines with the same time and split the lines with different time evenly. 'Union' is to merge all lines with the same time and split the lines with different time.
 .PARAMETER SplitChar
 Split character. Default is ' '.
+.PARAMETER MaxInterval
+Max interval for 'Intersect' method. Default is 10 (Second).
+.PARAMETER Offset
+Offset when meet max interval. Default is 1000 (Millisecond).
 .INPUTS
 System.String[]
 .OUTPUTS
@@ -35,16 +39,17 @@ param (
     [string[]]
     $Path,
     [Parameter(
-        ValueFromPipeline = $true,
-        ValueFromPipelineByPropertyName = $true,
         HelpMessage = "Merge method. Default is 'Merge'.")]
     [ValidateSet("Merge", "Intersect", "Union")]
+    [string]
     $MergeMethod = "Merge",
-    [Parameter(
-        ValueFromPipeline = $true,
-        ValueFromPipelineByPropertyName = $true,
-        HelpMessage = "Split character. Default is ' '.")]
-    $SplitChar = " "
+    [Parameter(HelpMessage = "Split character. Default is ' '.")]
+    [string]
+    $SplitChar = " ",
+    [Parameter(HelpMessage = "Max interval for 'Intersect' method. Default is 10 (Second).")]
+    $MaxInterval = 10,
+    [Parameter(HelpMessage = "Offset when meet max interval. Default is 1000 (Millisecond).")]
+    $Offset = 1000
 )
 
 class Lrc {
@@ -59,16 +64,18 @@ function Get-Lrc ($Path) {
         $lines = Get-Content -Path $_.FullName
         $lines | ForEach-Object {
             $line = $_
-            $lineContent = [regex]::Match($line, '\[(\d+:\d+\.\d+)\](.*)')
+            $lineContent = [regex]::Match($line, '(?:\[(\d+:\d+\.\d+)\])+(.*)')
             if ($lineContent.Success) {
-                $time = [timespan]::ParseExact($lineContent.Groups[1].Value, 'mm\:ss\.ff', [cultureinfo]::GetCultureInfo('en-US')).TotalMilliseconds
-                if ($lrc.Lines.ContainsKey($time)) {
-                    $lrc.Lines[$time].Add($lineContent.Groups[2].Value)
-                }
-                else {
-                    $list = [List[string]]::new()
-                    $list.Add($lineContent.Groups[2].Value)
-                    $lrc.Lines.Add($time, $list)
+                $lineContent.Groups[1].Captures | ForEach-Object {
+                    $time = [timespan]::ParseExact($_.Value, 'mm\:ss\.ff', [cultureinfo]::GetCultureInfo('en-US')).TotalMilliseconds
+                    if ($lrc.Lines.ContainsKey($time)) {
+                        $lrc.Lines[$time].Add($lineContent.Groups[2].Value)
+                    }
+                    else {
+                        $list = [List[string]]::new()
+                        $list.Add($lineContent.Groups[2].Value)
+                        $lrc.Lines.Add($time, $list)
+                    }
                 }
             }
         }
@@ -101,7 +108,7 @@ function Merge-Lrc ($Lrcs) {
     return $mergedLrc
 }
 
-function Save-Lrc ($Lrc, $MergeMethod = "Merge", $SplitChar = " ") {
+function Save-Lrc ($Lrc, $MergeMethod = "Merge", $SplitChar = " ", $MaxInterval = 10, $Offset = 1000) {
     switch ($MergeMethod) {
         "Merge" {
             return $Lrc.Lines.Keys | ForEach-Object {
@@ -120,7 +127,7 @@ function Save-Lrc ($Lrc, $MergeMethod = "Merge", $SplitChar = " ") {
                 else {
                     if ($i -eq ($times.Count - 1)) {
                         $currentTime = $times[$i]
-                        $interval = 100
+                        $interval = $Offset
                         for ($j = 0; $j -lt $lines.Count; $j++) {
                             $out.Add("[$([timespan]::FromMilliseconds($currentTime + $j * $interval).ToString('mm\:ss\.ff'))]$($lines[$j])")
                         }
@@ -129,6 +136,9 @@ function Save-Lrc ($Lrc, $MergeMethod = "Merge", $SplitChar = " ") {
                         $currentTime = $times[$i]
                         $nextTime = $times[$i + 1]
                         $interval = ($nextTime - $currentTime) / ($lines.Length)
+                        if ($nextTime - $currentTime -gt $MaxInterval * 1000) {
+                            $interval = $Offset
+                        }
                         for ($j = 0; $j -lt $lines.Count; $j++) {
                             $out.Add("[$([timespan]::FromMilliseconds($currentTime + $j * $interval).ToString('mm\:ss\.ff'))]$($lines[$j])")
                         }
@@ -153,4 +163,4 @@ if ($lrcs.Count -eq 0) {
     return
 }
 $mergedLrc = Merge-Lrc -Lrcs $lrcs
-return Save-Lrc -Lrc $mergedLrc -MergeMethod $MergeMethod -SplitChar $SplitChar
+return Save-Lrc -Lrc $mergedLrc -MergeMethod $MergeMethod -SplitChar $SplitChar -MaxInterval $MaxInterval -Offset $Offset
