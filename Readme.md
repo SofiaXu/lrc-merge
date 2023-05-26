@@ -2,7 +2,7 @@
 
 ## 介绍
 
-这是一个用于合并歌词的小工具，可以将多个歌词文件合并成一个歌词文件，也可以将多个歌词文件合并到一个音频文件中。
+这是一个用于合并歌词的小工具，可以将多个歌词文件合并成一个歌词文件。
 
 ## TL;DR
 
@@ -36,4 +36,46 @@
 
 ```powershell
 .\Merge-Lrc.ps1 -Path "C:\Users\user\Music\test.lrc" -MergeMethod "Intersect" -SplitChar " " | Out-File "C:\Users\user\Music\test.lrc"
+```
+
+## 合并方法结果
+
+- 输入文件
+
+```lrc
+[00:00.00] test
+[00:00.00] test
+[00:00.00] test
+[00:01.00] test
+[00:01.00] test
+[00:01.00] test
+```
+
+- Merge
+
+```lrc
+[00:00.00] test test test
+[00:01.00] test test test
+```
+
+- Intersect
+
+```lrc
+[00:00.00] test
+[00:00.33] test
+[00:00.66] test
+[00:01.00] test
+[00:01.33] test
+[00:01.66] test
+```
+
+- Union
+
+```lrc
+[00:00.00] test
+[00:00.00] test
+[00:00.00] test
+[00:01.00] test
+[00:01.00] test
+[00:01.00] test
 ```
